@@ -110,4 +110,4 @@ CertUtil: -hashfile command completed successfully.
 ```
 
 # Solution
-Backup algorithm needs to be fixed. Vefification for directory backup mode needs to be made better, not sure if not disabled / removed as currently it doesn't have any point and doesn't really verify integrity of the backup, at lease in this mode.
+Backup algorithm needs to be fixed. Verification for directory backup mode needs to be made better, not sure if not disabled / removed as currently it doesn't have any point and doesn't really verify integrity of the backup, at lease in this mode.
