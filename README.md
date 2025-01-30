@@ -3,12 +3,12 @@ Recently when doing some VM/DB maintenance I came to a realization that AOMEI Ba
 
 After analyzing the files before/after the restore - it seems that some regions of random files will be empty. Also by analyzying before and after it seems that sometimes data is misplaced (we have data which belongs in some other place, in totally random locations). These errors are repeatable across different systems and different software versions (MD5 hashes of restored files will differ from source, so the file is corrupted - but we'll always be getting exactly the same corruption).
 
-The other issue is that "Integrity verification" feature will only verify the integrity of the backup itself, it won't compare the files stored on drive vs the files in backup. So in all the cases the backup will be integral but the user will be able to restore... corrupted data. The last issue is that there's no possibility to view any kind of file checksum. So the user isn't even albe to REALLY verify the integrity of backed up files, without a full restore.
+The other issue is that "Integrity verification" feature will only verify the integrity of the backup itself, it won't compare the files stored on drive vs the files in backup. So in all the cases the backup will be integral but the user will be restoring... corrupted data. The last issue is that there's no possibility to view any kind of file checksum. So the user isn't even albe to REALLY verify the integrity of backed up files, without a full restore. The built-in "verification" fearture should be carefully documented that it only verifies the integrity of the backup file, not integrity of the source as in current shape it only gives a false hope of integrity. All corrupted backups i made - successfully passed the integrity tests. Probably all ingested files (at least in dir/file mode) need to have their checksums written and then the checksum needs to be compared to data from archive during verification, for this verification to make sense.
 
 After restoring data, eg. full VM Guest Files, they seem working but there are issues such as:
 - Constant segfaults of different software
 - Lost of full database tables as metadata is getting corrupted
-- Inability of databases to open tables or files
+- Inability of databases to fully read tables (lost connection, random errors)
 - Lost file content
 
 There is an example below for file backup and restore
@@ -81,5 +81,30 @@ vmware.log                      b562b2eda7c9a7a7837e47986859504a
 
 The corruption will ALWAYS be the same, doesn't matter if the backup is made on AMD or on Intel system. Doesn't matter what AOMEI Backupper version we're using. The resulting set of files is basically runnable, but unusable because all installed apps are crashing or are unstable, when run. Corruption seems to not be contained inside single file, many times I saw that file B got corrupted, when i put specific file A into the backup. Even more weird was that file A was backed up and restored correctly, it just affected file's B data.
 
+# Reproducing the issue
+Please download all attached files and run the command below in CLI.
+```
+php -f gen_dataset2.php
+```
 
+Output dataset checksums:
+```
+> foreach($f in dir) { if (!$f.PSIsContainer) {certutil -hashfile "$f" md5} }
+MD5 hash of Debian8-Apache-cl1-000001.vmdk:
+899777421494a3e9ea57b38bfb7ca7db
+CertUtil: -hashfile command completed successfully.
+MD5 hash of Debian8-Apache-cl1.vmdk:
+f9177ae1dfc1d20e6b41a5e95a84f75f
+```
+
+Checksum after backup + restore:
+```
+> foreach($f in dir){ if (!$f.PSIsContainer) {certutil -hashfile "$f" md5} }
+MD5 hash of Debian8-Apache-cl1-000001.vmdk:
+899777421494a3e9ea57b38bfb7ca7db
+CertUtil: -hashfile command completed successfully.
+MD5 hash of Debian8-Apache-cl1.vmdk:
+****** 688273c35bb1133d08b82b15e51772bf
+CertUtil: -hashfile command completed successfully.
+```
 
