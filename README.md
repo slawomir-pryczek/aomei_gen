@@ -5,7 +5,7 @@ After analyzing the files before/after the restore - it seems that some regions 
 
 The other issue is that "Integrity verification" feature will only verify the integrity of the backup itself, it won't compare the files stored on drive vs the files in backup. So in all the cases the backup will be integral but the user will be restoring... corrupted data. The last issue is that there's no possibility to view any kind of file checksum. So the user isn't even albe to REALLY verify the integrity of backed up files, without a full restore. The built-in "verification" fearture should be carefully documented that it only verifies the integrity of the backup file, not integrity of the source as in current shape it only gives a false hope of integrity. All corrupted backups i made - successfully passed the integrity tests. Probably all ingested files (at least in dir/file mode) need to have their checksums written and then the checksum needs to be compared to data from archive during verification, for this verification to make sense.
 
-#The issue
+# The issue
 After restoring data, eg. full VM Guest Files, they seem working at a first glance, but there are issues such as:
 - Constant segfaults of different software
 - Lost of full database tables as metadata is getting corrupted
