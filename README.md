@@ -5,13 +5,14 @@ After analyzing the files before/after the restore - it seems that some regions 
 
 The other issue is that "Integrity verification" feature will only verify the integrity of the backup itself, it won't compare the files stored on drive vs the files in backup. So in all the cases the backup will be integral but the user will be restoring... corrupted data. The last issue is that there's no possibility to view any kind of file checksum. So the user isn't even albe to REALLY verify the integrity of backed up files, without a full restore. The built-in "verification" fearture should be carefully documented that it only verifies the integrity of the backup file, not integrity of the source as in current shape it only gives a false hope of integrity. All corrupted backups i made - successfully passed the integrity tests. Probably all ingested files (at least in dir/file mode) need to have their checksums written and then the checksum needs to be compared to data from archive during verification, for this verification to make sense.
 
-After restoring data, eg. full VM Guest Files, they seem working but there are issues such as:
+#The issue
+After restoring data, eg. full VM Guest Files, they seem working at a first glance, but there are issues such as:
 - Constant segfaults of different software
 - Lost of full database tables as metadata is getting corrupted
-- Inability of databases to fully read tables (lost connection, random errors)
+- Inability of databases to fully read tables (lost connection, random errors during full table scans after correctly reading only some part of the table)
 - Lost file content
 
-There is an example below for file backup and restore
+There is an example below for file backup and restore checksums (restore was done right after backup on disabled VM)
 ```
 Name                            MD5                               Size          Date              Cumulative Size  
 Debian8-Apache-cl1-000001.vmdk  26a28c6491294ccf843104c18b9830f8  153336086528  06.07.2020 11:34  153336086528      
@@ -79,7 +80,7 @@ vmware-2.log                    122c2820c12638ee94ac3c9b5989078c
 vmware.log                      b562b2eda7c9a7a7837e47986859504a                
 ```
 
-The corruption will ALWAYS be the same, doesn't matter if the backup is made on AMD or on Intel system. Doesn't matter what AOMEI Backupper version we're using. The resulting set of files is basically runnable, but unusable because all installed apps are crashing or are unstable, when run. Corruption seems to not be contained inside single file, many times I saw that file B got corrupted, when i put specific file A into the backup. Even more weird was that file A was backed up and restored correctly, it just affected file's B data.
+The corruption will ALWAYS be the same, doesn't matter if the backup is made on AMD or on Intel system. Doesn't matter what AOMEI Backupper version we're using. The resulting set of files is basically runnable, but unusable because all installed apps are crashing, missing data or are unstable, when run. Corruption seems to not be contained inside single file, many times I saw that file B got corrupted, when i put specific file A into the backup. Even more weird was that file A was backed up and restored correctly, it just affected file's B data, so maybe there's some overflow in some variable inside the backup/restore code.
 
 # Reproducing the issue
 Please download all attached files and run the command below in CLI.
@@ -108,3 +109,5 @@ MD5 hash of Debian8-Apache-cl1.vmdk:
 CertUtil: -hashfile command completed successfully.
 ```
 
+# Solution
+Backup algorithm needs to be fixed. Vefification for directory backup mode needs to be made better, not sure if not disabled / removed as currently it doesn't have any point and doesn't really verify integrity of the backup, at lease in this mode.
