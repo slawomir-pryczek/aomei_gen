@@ -35,9 +35,9 @@ $f->autosize();
 echo "{$f}\n";
 
 echo "Ensure there's enough space on the device. Press any key to proceed...\n";
-readline_callback_handler_install('', function() {});
-$keystroke = stream_get_contents(STDIN, 1);
-echo "\n";
+//readline_callback_handler_install('', function() {});
+//$keystroke = stream_get_contents(STDIN, 1);
+//echo "\n";
 
 foreach ($config as $v) {
 	echo "\n\nGenerating {$v[0]}\n";
